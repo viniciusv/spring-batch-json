@@ -3,15 +3,17 @@ package br.com.ubs.batch.partitioner;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.core.io.Resource;
-import org.springframework.util.Assert;
 
 public class CustomMultiResourcePartitioner implements Partitioner{
 
-	private static final String DEFAULT_KEY_NAME = "fileName";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CustomMultiResourcePartitioner.class);
 	
+	private static final String DEFAULT_KEY_NAME = "fileName";
 	private static final String PARTITION_KEY = "partition";
 	
 	private Resource[] resources = new Resource[0];
@@ -23,9 +25,7 @@ public class CustomMultiResourcePartitioner implements Partitioner{
 		
 		for (Resource resource : resources) {
 			ExecutionContext context = new ExecutionContext();
-			Assert.state(resource.exists(), "Resource does not exist: " + resource);
 			context.putString(DEFAULT_KEY_NAME, resource.getFilename());
-
 			map.put(PARTITION_KEY + index, context);
 			index++;
 		}

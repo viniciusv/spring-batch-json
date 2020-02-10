@@ -1,5 +1,7 @@
 package br.com.ubs.batch.process;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
@@ -9,6 +11,8 @@ import br.com.ubs.batch.dto.ProdutoDto;
 import br.com.ubs.batch.model.Produto;
 
 public class CustomItemProcessor implements ItemProcessor<ProdutoDto, Produto> {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CustomItemProcessor.class);
 
 	private String file_name;
 
@@ -26,7 +30,6 @@ public class CustomItemProcessor implements ItemProcessor<ProdutoDto, Produto> {
 	@Override
 	public Produto process(ProdutoDto ProdutoDto) throws Exception {
 		Produto produto = new Produto(ProdutoDto, this.file_name);
-		System.out.println("Processing..."+ this.file_name + " " + produto.toString());
 		return produto;
 	}
 

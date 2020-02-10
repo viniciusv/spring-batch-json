@@ -5,6 +5,8 @@ import java.text.ParseException;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -36,6 +38,8 @@ import br.com.ubs.batch.process.CustomItemProcessor;
 @Configuration
 @EnableBatchProcessing
 public class BatchJsonConfig {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(BatchJsonConfig.class);
 
 	@Autowired
 	private JobBuilderFactory jobs;
@@ -48,6 +52,8 @@ public class BatchJsonConfig {
 
 	@Value("${diretorio.json}")
 	private Resource[] diretorioJson;
+	
+	private static final String QUERY_INSERT = "INSERT INTO produto (file_import,industry,origin,price,product,quantity,type,volume) VALUES (:file_import_name, :industry, :origin, :price, :product, :quantity, :type, :volume)";
 
 	@Bean(name = "partitionerJob")
 	public Job partitionerJob() throws UnexpectedInputException, MalformedURLException, ParseException {
@@ -99,6 +105,8 @@ public class BatchJsonConfig {
 
 		GsonJsonObjectReader<ProdutoDto> jsonObjectReader = new GsonJsonObjectReader<>(ProdutoDto.class);
 		jsonObjectReader.setMapper(objectMapper);
+		
+		LOGGER.info("Job get File : ", filename);
 
 		return new JsonItemReaderBuilder<ProdutoDto>()
 				.name("itemReaderJson")
@@ -116,9 +124,10 @@ public class BatchJsonConfig {
 	@Bean
 	@StepScope
 	public JdbcBatchItemWriter<Produto> itemWriter() {
+		LOGGER.info("Produto Inserido no banco! ");
 		JdbcBatchItemWriter<Produto> itemWriter = new JdbcBatchItemWriter<Produto>();
 		itemWriter.setDataSource(dataSource);
-		itemWriter.setSql("INSERT INTO produto (file_import,industry,origin,price,product,quantity,type,volume) VALUES (:file_import_name, :industry, :origin, :price, :product, :quantity, :type, :volume)");
+		itemWriter.setSql(QUERY_INSERT);
 		itemWriter.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<Produto>());
 		return itemWriter;
 	}
